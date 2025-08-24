@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Игровой Дроптаун</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @keyframes bounce-in {
+      0% { transform: scale(0.8); opacity: 0; }
+      60% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); }
+    }
+    .animate-bounce-in {
+      animation: bounce-in 0.4s ease-out forwards;
+    }
+    @keyframes fade-in {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .animate-fade-in {
+      animation: fade-in 0.3s ease-out forwards;
+    }
+    .blur-text {
+      filter: blur(4px);
+      user-select: none;
+      pointer-events: none;
+    }
+    /* Стиль для кастомного dropdown */
+    .dropdown-item:hover,
+    .dropdown-item.active {
+      background-color: #374151;
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-gray-900 via-black to-indigo-950 text-white flex items-center justify-center p-4">
+<div id="app" class="max-w-md w-full mx-auto bg-gray-800/90 backdrop-blur-sm rounded-xl shadow-2xl overflow-visible border border-gray-700 transition-all duration-300">
+    <div class="p-6 relative">
+      <!-- Заголовок -->
+      <h1 class="text-4xl font-extrabold text-center mb-6 bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 text-transparent bg-clip-text">
+        Дроптаун v1.1
+      </h1>
+
+      <!-- Кнопка Назад -->
+      <button id="backBtn" class="absolute top-4 left-4 p-2 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors duration-200 focus:outline-none hidden" aria-label="Назад">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M19 12H5M12 19l-7-7 7-7" />
+        </svg>
+      </button>
+
+<div id="step1" class="relative">
+  <label for="genre" class="block text-sm font-medium mb-2">Выберите жанр:</label>
+  <div class="relative">
+    <button 
+      id="genreDropdownBtn" 
+      class="w-full px-4 py-2 text-left bg-gray-700 border border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 flex justify-between items-center"
+      type="button"
+    >
+      <span id="dropdownLabel">-- Выберите жанр --</span>
+      <svg id="arrowIcon" class="w-5 h-5 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+      </svg>
+    </button>
+    <ul id="genreDropdownList" class="absolute left-0 right-0 mt-1 bg-gray-700 border border-gray-600 rounded-lg shadow-lg max-h-60 overflow-auto hidden z-50">
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Shooter">Шутеры</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Strategy">Стратегии</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Survival">Выживание</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Horror">Хорроры</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Racing">Гонки</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="RPG">РПГ</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Coop">Кооператив</li>
+      <li class="px-4 py-2 hover:bg-gray-600 cursor-pointer text-sm" data-value="Secret">Секретные</li>
+    </ul>
+    <input type="hidden" id="genre" />
+  </div>
+</div>
+
+      <!-- Шаг 2: Подтверждение жанра + Крутить -->
+      <div id="step2" class="mt-6 animate-fade-in hidden">
+        <div class="mb-6">
+          <p class="text-center text-lg">Выбран жанр:</p>
+          <h2 id="selectedGenreText" class="text-2xl font-semibold text-center mt-1 text-purple-400"></h2>
+        </div>
+        <div class="mb-6 h-16 flex items-center justify-center">
+          <button id="spinBtn" class="px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-500 hover:to-pink-500 text-white font-semibold rounded-lg shadow-lg transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-purple-400">
+            Крутить
+          </button>
+          <div id="spinner" class="hidden flex flex-col items-center">
+            <span id="spinningGame" class="animate-pulse text-lg"></span>
+            <div class="mt-2 w-8 h-8 border-4 border-purple-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Шаг 3: Результат -->
+      <div id="step3" class="mt-6 text-center animate-bounce-in hidden">
+        <div class="bg-green-900/30 border border-green-700 rounded-lg p-4 mb-6">
+          <h3 class="text-xl font-bold text-green-400 mb-2">Поздравляем!</h3>
+          <p class="text-lg">Вам выпала игра:</p>
+          <p id="resultGameText" class="text-2xl font-bold mt-1"></p>
+        </div>
+        <button id="backToStart" class="w-full py-3 bg-gray-700 hover:bg-gray-600 text-white font-semibold rounded-lg transition-colors duration-200">
+          Назад
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const dropdownBtn = document.getElementById('genreDropdownBtn');
+    const dropdownLabel = document.getElementById('dropdownLabel');
+    const dropdownList = document.getElementById('genreDropdownList');
+    const arrowIcon = document.getElementById('arrowIcon');
+    const genreInput = document.getElementById('genre'); // скрытое поле
+    const step1 = document.getElementById('step1');
+    const step2 = document.getElementById('step2');
+    const step3 = document.getElementById('step3');
+    const backBtn = document.getElementById('backBtn');
+    const spinBtn = document.getElementById('spinBtn');
+    const spinner = document.getElementById('spinner');
+    const spinningGame = document.getElementById('spinningGame');
+    const selectedGenreText = document.getElementById('selectedGenreText');
+    const resultGameText = document.getElementById('resultGameText');
+
+    const genres = {
+      Shooter: [
+	"Doom 3", "Doom (2016)", "Doom Eternal",
+        "Call of Duty 1", "Call of Duty 2", "Call of Duty: Modern Warfare 1", 
+        "Call of Duty: Modern Warfare 2", "Call of Duty: Modern Warfare 3", 
+        "Call of Duty: Black Ops 1", "Call of Duty: Black Ops 2", 
+        "Call of Duty: Black Ops 3", "Call of Duty: Infinite Warfare",
+        "Battlefield 2", "Battlefield Bad Company 2", "Battlefield 3", 
+        "Battlefield 4", "Battlefield Hardline", "Battlefield 1", "Battlefield 5",
+        "Quake 1", "Quake 2", "Quake 3 Arena", "Quake 4", "Bulletstorm",
+        "Far Cry 1", "Far Cry 2", "Far Cry 3", "Far Cry 4", "Far Cry 5", "Far Cry 6",
+        "Far Cry Blood Dragon", "Far Cry Primal",
+        "Titanfall 2", "GTA 4", "GTA 5", "GTA Vice City", "GTA San Andreas",
+        "Call of Juarez: Gunslinger", 'Witchfire',
+        "Mafia Definitive Edition", "Gunfire Reborn", "Sniper Elite 5", "Alien Shooter 2", "Sanctum 2",
+        "TimeShift", "Turok", "S.T.A.L.K.E.R Тень Чернобыля", "S.T.A.L.K.E.R Чистое Небо", "S.T.A.L.K.E.R Зов Припяти",
+        "Half-Life", "Half-Life 2", "Half-Life 2 Episode 1", "Half-Life 2 Episode 2",
+        "Wolfenstein New Order", "Wolfenstein New Colossus", "Wolfenstein Old Blood",
+        "Bioshock", "Bioshock 2", "Bioshock Infinite",
+        "Borderlands", "Borderlands 2", "Borderlands 3", "Borderlands Pre-Sequel",
+        "Crysis 1", "Crysis 2", "Crysis 3",
+        "Halo Combat Evolved", "Halo 2", "Halo 3", "Halo ODST", "Halo 4", "Halo Reach",
+        "Star Wars Republic Commando",
+        "Tomb Raider", "Tomb Raider Rise", "Tomb Raider Shadow", "Tomb Raider Underworld",
+	"Red Dead Redemption 2",
+        "Dead Space", "Dead Space 2", "Dead Space 3",
+        "Gears of War", "Gears of War 4", "Gears of War 5",
+        "Dead Rising", "Dead Rising 2", "Dead Rising 3", "Dead Rising 4",
+        "Serius Sam First", "Serius Sam Second", "Serius Sam 2", "Serius Sam 3", "Serius Sam 4",
+        "Sniper Elite 1", "Sniper Elite 2", "Sniper Elite 3", "Sniper Elite 4", "Sniper Elite Resistance",
+        "Transformers: War for Cybertron", "Starship Troopers",
+        "RAGE", "RAGE 2", "Quantum Break",
+        "Armored Core 6", "Saints Row 2", "Mafia 2",
+        "Spec Ops: The Line", "Hotline Miami", "Max Payne", "Max Payne 2", "Max Payne 3",
+        "Black Mesa", "Cruelty Squad", "Arma 3",
+        "Metal Gear Solid 1", "Metal Gear Solid 2", "Metal Gear Solid 3", "Metal Gear Solid 4",
+        "Metal Gear Solid Ground Zeroes", "Metal Gear Solid 5",
+        "Left 4 Dead 2"
+      ],
+      Strategy: [
+        "Command & Conquer: Generals – Zero Hour",
+        "Stronghold Crusader HD",
+        "Star Wars: Empire at War",
+        "Warcraft III: Reign of Chaos",
+        "Warcraft III: The Frozen Throne",
+        "StarCraft II",
+        "XCOM (2012)",
+        "The Settlers: Heritage of Kings",
+        "Age of Wonders 4",
+        "Heroes of Might and Magic III",
+        "Supreme Commander",
+        "Frostpunk",
+        "The Settlers II: 10th Anniversary Edition",
+        "Empires of the Undergrowth",
+        "Northgard",
+        "Song of Conquest",
+        "Kingdom Rush: Vengeance",
+        "Kingdom: New Lands",
+        "Craft The World",
+        "Terra Nil",
+        "Gratuitous Space Battles",
+        "Yes, Your Grace", "Frostpunk 2",
+        "Command and Conquer: Red Alert 3",
+        "Command & Conquer: Generals",
+        "Command & Conquer: Generals – Zero Hour",
+        "Command & Conquer: Tiberium Wars",
+        "This War of Mine",
+        "Warhammer 40,000: Dawn of War",
+        "Warhammer 40,000: Dawn of War II",
+        "Warhammer 40,000: Dawn of War III",
+        "The Lord of the Rings: The Battle for Middle-earth",
+        "The Lord of the Rings: The Battle for Middle-earth II",
+        "Company of Heroes",
+        "Age of Empires III",
+        "Stronghold Crusader II",
+        "Overlord II",
+        "Spore",
+        "Against the Storm",
+	"Halo Wars 1",
+	"Halo Wars 2"
+      ],
+      Survival: [
+        "Minecraft",
+        "The Forest",
+        "State of Decay",
+        "State of Decay 2",
+        "The Long Dark",
+        "Space Haven",
+        "Stranded Deep",
+        "Raft",
+        "Grounded",
+        "Subnautica",
+        "Subnautica: Below Zero",
+        "How to Survive",
+	"Revenge of the Savage Planet",
+	"Pacific Drive",
+	"Breathedge",
+	"Green Hell"
+      ],
+      Horror: [
+        "Visage",
+        "Outlast", "Outlast 2",
+        "Layers of Fear", "Layers of Fear 2",
+        "Amnesia: Rebirth", "Amnesia: A Machine for Pigs", "Amnesia: Dark Descent", "Amnesia: The Bunker",
+        "Cry of Fear",
+        "Escape of the Backrooms",
+        "Fahrenheit: Indigo Prophecy Remastered",
+        "Alien: Isolation",
+        "A Plague Tale: Innocence", "A Plague Tale: Requiem",
+        "INSIDE",
+        "Forewarned",
+        "Dying Light", "Dying Light 2",
+        "Resident Evil 7", "Resident Evil 4", "Resident Evil Village", "Resident Evil 2",
+        "Among the Sleep",
+        "SCP Containment Breach",
+        "At Dead of Night",
+        "Little Nightmares", "Little Nightmares 2",
+        "Dead Space", "Dead Space 2", "Dead Space 3",
+        "Knock Knock",
+        "The Evil Within", "The Evil Within 2",
+        "F.E.A.R", "F.E.A.R 2", "F.E.A.R 3",
+        "SOMA",
+        "Alan Wake", "Alan Wake 2",
+        "Silent Hill 2", "Silent Hill 3", "Silent Hill 4",
+        "DARQ",
+        "Saiko no Sotoka",
+        "Love is All: Love School Days",
+        "Pacify",
+        "SIGNALIS",
+        "Darkwood",
+        "The Last Of Us",
+        "Days Gone",
+        "Dead Island", "Dead Island 2",
+        "Metro 2033", "Metro: Last Light", "Metro Exodus",
+        "F.E.A.R", "F.E.A.R 2", "F.E.A.R 3"
+      ],
+      Racing: [
+        "Need For Speed Underground 2",
+        "Need For Speed Most Wanted",
+        "Need For Speed Carbon",
+        "Need For Speed Hot Pursuit (2010)",
+        "Need For Speed Heat",
+        "Need For Speed Rivals",
+        "Need For Speed Shift",
+        "Need For Speed Payback",
+        "Need For Speed The Run",
+        "Need For Speed Pro Street",
+        "Grid", "Grid 2", "Grid Autosport", "Grid Legends",
+        "DIRT Rally", "DIRT 4", "DIRT Rally 2.0", "DIRT3", "DIRT5", "DIRT2", "DIRT1",
+        "Flatout", "Flatout 2", "Flatout 3", "FlatOut: Ultimate Carnage",
+        "Need For Speed (2015)", "Need For Speed Shift 2",
+        "Sonic Riders",
+        "Blur",
+        "Burnout Paradise",
+        "Driver: San Francisco",
+        "Split Second",
+        "Need for Speed: Undercover",
+        "Test Drive Unlimited 2",
+        "Mashed", "Mashed 2",
+        "Assetto Corsa",
+        "Hard Truck Apocalypse"
+      ],
+      RPG: [
+        "The Witcher 3: Wild Hunt",
+        "Baldur's Gate 3",
+        "Dragon Age: Origins", "Dragon Age 2", "Dragon Age: Inquisition",
+        "Divinity: Original Sin", "Divinity: Original Sin 2",
+        "Mass Effect", "Mass Effect 2", "Mass Effect 3", "Mass Effect Andromeda",
+        "Cyberpunk 2077",
+        "Watch Dogs",
+        "The Elder Scrolls 5: Skyrim", "The Elder Scrolls 4: Oblivion",
+        "Fallout New Vegas", "Fallout 3", "Fallout 2", "Fallout 4",
+        "Disco Elysium",
+        "Jedi: Fallen Order", "Jedi Survivor", "Dragon's Dogma",
+        "The Witcher 2: Assassins of Kings",
+        "Elden Ring",
+        "Mad Max",
+        "Children of Morta",
+        "Космические рейнджеры 2 HD",
+        "Cult of the Lamb",
+        "Darkest Dungeon", "Darkest Dungeon 2",
+        "Thief",
+        "Готика 3: Наследие драконов",
+        "South Park: The Stick of Truth",
+        "Dark Souls", "Dark Souls 2", "Dark Souls 3",
+        "Dragon Dogma",
+        "Deus Ex: Human Revolution",
+        "Risen", "Pathfinder: Wrath of the Righteous",
+        "Pillars of Eternity: Deadfire",
+        "Fable 3",
+        "Torchlight 2",
+        "Kingdom Come: Deliverance", "Kingdom Come: Deliverance 2",
+        "The Outer Worlds",
+        "Skyrim Special Edition",
+        "LISA: The Painful",
+        "The Legend of Heroes: Trails in the Sky",
+        "Yakuza 0", "Like a Dragon: Infinite Wealth",
+        "For Honor",
+        "Marvel's Midnight Suns",
+        "Final Fantasy XIII", "Final Fantasy XIII-2", "LIGHTNING RETURNS™: FINAL FANTASY® XIII",
+        "Final Fantasy Crisis Core – Reunion",
+        "Final Fantasy VII Remake",
+        "Final Fantasy XV",
+	"Wasteland 2: Director's Cut", "Wasteland 3",
+        "Stardew Valley",
+        "Monster Hunter: World", "Monster Hunter Rise",
+        "Horizon Zero Dawn",
+        "SCARLET NEXUS",
+	"ATOM RPG",
+        "System Shock", "System Shock 2",
+        "Tainted Grail: The Fall of Avalon", "Vampire: The Masquerade — Bloodlines"
+      ],
+      Coop: [
+        "It Takes Two",
+        "A Way Out",
+        "Divinity: Original Sin", "Divinity: Original Sin 2",
+        "Portal 2",
+        "Saints Row: The Third", "Saints Row IV",
+        "Minecraft",
+        "The Forest", "Wasteland 3",
+        "Dying Light", "Dying Light 2",
+        "Split Fiction",
+	"Revenge of the Savage Planet",
+	"We Were Here",
+	"Borderlands", "Borderlands 2", "Borderlands 3", "Borderlands Pre-Sequel",
+	"Left 4 Dead 2",
+	"Resident Evil 5", "Resident Evil 6", "PEAK", "Dead Island", "Dead Island 2"
+      ],
+      Secret: [
+        "Back to the Future: Episode 1",
+        "The Walking Dead (Season 1)",
+        "VA-11 Hall-A: Cyberpunk Bartender Action",
+        "The Bookwalker: Thief of Tales",
+        "Road 96",
+        "Naruto x Boruto: Ultimate Ninja Storm Connections",
+        "Uncharted 4",
+        "Portal", "Portal 2",
+	"The Precinct",
+        "Inscryption",
+        "Q.U.B.E.",
+	"Hollow Knight",
+        "Armored Core VI: Fires of Rubicon",
+        "DEATH STRANDING",
+        "TUNIC", "Clair Obscur: Expedition 33",
+	"Marvel’s Spider-Man",
+        "Ori and the Blind Forest", "Ori and the Will of the Wisps",
+        "Nobody Wants to Die",
+        "Tales from the Borderlands",
+        "Sekiro: Shadows Die Twice",
+        "Pray",
+        "The Binding of Isaac",
+        "Detroit: Become Human",
+        "Metaphor: Refantazio",
+        "Manual Samuel",
+        "Cloudpunk",
+	"The Movies",
+	"The Alters",
+        "Road 96: Mile Zero"
+      ]
+    };
+
+    let isSpinning = false;
+    let currentGameIndex = 0;
+    let intervalId = null;
+    let gamesToSpin = [];
+    let isSecretMode = false;
+
+    // Кастомный dropdown
+    dropdownBtn.addEventListener('click', () => {
+      const isHidden = dropdownList.classList.contains('hidden');
+      dropdownList.classList.toggle('hidden', !isHidden);
+      arrowIcon.classList.toggle('rotate-180', isHidden);
+    });
+
+    // Выбор жанра
+    dropdownList.querySelectorAll('li').forEach(li => {
+      li.addEventListener('click', () => {
+        const value = li.dataset.value;
+        const text = li.textContent;
+
+        genreInput.value = value;
+        dropdownLabel.textContent = text;
+
+        dropdownList.classList.add('hidden');
+        arrowIcon.classList.remove('rotate-180');
+
+        // Переход к шагу 2
+        step1.classList.add('hidden');
+        selectedGenreText.textContent = text;
+        step2.classList.remove('hidden');
+        setTimeout(() => step2.classList.add('animate-fade-in'), 10);
+        backBtn.classList.remove('hidden');
+      });
+    });
+
+    // Закрытие при клике вне
+    document.addEventListener('click', (e) => {
+      if (!dropdownBtn.contains(e.target) && !dropdownList.contains(e.target)) {
+        dropdownList.classList.add('hidden');
+        arrowIcon.classList.remove('rotate-180');
+      }
+    });
+
+    function resetApp() {
+      isSpinning = false;
+      gamesToSpin = [];
+      currentGameIndex = 0;
+      isSecretMode = false;
+      if (intervalId) clearInterval(intervalId);
+      intervalId = null;
+      spinner.classList.add('hidden');
+      spinBtn.classList.remove('hidden');
+      step2.classList.add('hidden');
+      step3.classList.add('hidden');
+      backBtn.classList.add('hidden');
+
+      // Сброс
+      genreInput.value = "";
+      dropdownLabel.textContent = "-- Выберите жанр --";
+      step1.classList.remove('hidden');
+    }
+
+    spinBtn.addEventListener('click', () => {
+      if (isSpinning) return;
+      const selectedGenre = genreInput.value;
+      if (!selectedGenre) return;
+
+      gamesToSpin = genres[selectedGenre];
+      currentGameIndex = 0;
+      isSpinning = true;
+      isSecretMode = selectedGenre === 'Secret';
+
+      spinner.classList.remove('hidden');
+      spinBtn.classList.add('hidden');
+      backBtn.classList.add('hidden');
+      spinningGame.textContent = gamesToSpin[currentGameIndex];
+      if (isSecretMode) {
+        spinningGame.classList.add('blur-text');
+      }
+
+      intervalId = setInterval(() => {
+        currentGameIndex = (currentGameIndex + 1) % gamesToSpin.length;
+        spinningGame.textContent = gamesToSpin[currentGameIndex];
+      }, 200);
+
+      setTimeout(() => {
+        clearInterval(intervalId);
+        const finalIndex = Math.floor(Math.random() * gamesToSpin.length);
+        resultGameText.textContent = gamesToSpin[finalIndex];
+        isSpinning = false;
+        spinner.classList.add('hidden');
+        step2.classList.add('hidden');
+        step3.classList.remove('hidden');
+        setTimeout(() => step3.classList.add('animate-bounce-in'), 10);
+        backBtn.classList.remove('hidden');
+        spinningGame.classList.remove('blur-text');
+      }, 10000);
+    });
+
+    backBtn.addEventListener('click', resetApp);
+    document.getElementById('backToStart').addEventListener('click', resetApp);
+  </script>
+</body>
+</html>
